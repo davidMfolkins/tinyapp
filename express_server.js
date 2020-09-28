@@ -6,11 +6,6 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
-const generateRandomString = function() {
-  return Math.random().toString(36).substr(2, 6);
-};
-
-
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -42,9 +37,17 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const newURL = req.body;
+  const randomID = Math.random().toString(36).substr(2, 6);
+  urlDatabase[randomID] = newURL.longURL;
+  res.redirect(`/urls/${randomID}`);
 });
 
 app.listen(PORT, () => {
