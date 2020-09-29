@@ -10,15 +10,15 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
 
         <!-- if user is already logged in, display their name and logout button -->
-        <% if(username){ %>
+        <% if(user.id){ %>
         <form action="/logout" method="POST">
-          <a class="nav-item nav-link" href="/urls"><%= username %></a>
+          <a class="nav-item nav-link" href="/urls">Logged in as <%= user.email %></a>
           <button type="submit">Logout</button>
         </form>
         <!-- if not, display the input bar and login button -->
         <% } else{ %>
         <form action="/login" method="POST">
-          <label for="username" class="nav-item nav-link">Username</label>
+          <label for="username" class="nav-item nav-link"></label>
           <input type="text" name="username">
           <button type="submit">Login</button>
         </form>
