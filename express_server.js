@@ -11,14 +11,6 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -38,22 +30,23 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+  res.redirect(urlDatabase[req.params.shortURL]);
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  const newURL = req.body;
   const randomID = Math.random().toString(36).substr(2, 6);
-  urlDatabase[randomID] = newURL.longURL;
+  urlDatabase[randomID] = req.body.longURL;
   res.redirect(`/urls/${randomID}`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL
-  delete urlDatabase[shortURL];
-  res.redirect("/urls")
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+});
+
+app.post("/urls/:shortURL", (req, res) => {
+  urlDatabase[req.params.shortURL] = req.body.longURL;
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
