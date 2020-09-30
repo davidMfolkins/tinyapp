@@ -44,7 +44,7 @@ const urlsForUser = function(urlDatabase, userId) {
 
   for (let shortURL in urlDatabase) {
     const urlObj = urlDatabase[shortURL]
-    if (urlObj.userID === id) {
+    if (urlObj.userID === userId) {
       filteredUrls[shortURL] = urlObj;
     }
   }
@@ -57,11 +57,22 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const user = users[req.cookies.user_id]
   const templateVars = {
     urls: urlDatabase,
     user: users[req.cookies.user_id]
   };
-  res.render("urls_index", templateVars);
+
+  if(user) {
+    const filteredForUser = {
+      urls: urlsForUser(urlDatabase, user.id),
+      user: users[req.cookies.user_id]
+    };
+    
+    res.render("urls_index", filteredForUser);
+  } else {
+    res.render("urls_register", templateVars)
+  }
 });
 
 app.get("/urls/new", (req, res) => {
