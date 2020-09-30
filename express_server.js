@@ -68,7 +68,7 @@ app.get("/urls", (req, res) => {
       urls: urlsForUser(urlDatabase, user.id),
       user: users[req.cookies.user_id]
     };
-    
+
     res.render("urls_index", filteredForUser);
   } else {
     res.render("urls_register", templateVars)
@@ -121,22 +121,33 @@ app.get("/login", (req, res) => {
 app.post("/urls", (req, res) => {
   const userID = users[req.cookies.user_id].id
   const randomID = Math.random().toString(36).substr(2, 6);
-
+ 
   urlDatabase[randomID] = { longURL: req.body.longURL, userID: userID }
   res.redirect(`/urls/${randomID}`);
+
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  const user = users[req.cookies.user_id]
+  if (user) {
+    delete urlDatabase[req.params.shortURL];
+  } else {
+    res.send("You are not authorized to delete this")
+  }
+
   res.redirect("/urls");
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-
   const userID = urlDatabase[req.params.shortURL].userID
+  const user = users[req.cookies.user_id]
 
-  urlDatabase[req.params.shortURL] = { longURL: req.body.longURL, userID: userID };
-  res.redirect("/urls");
+  if(user) {
+    urlDatabase[req.params.shortURL] = { longURL: req.body.longURL, userID: userID };
+    res.redirect("/urls");
+  } else {
+    res.send("You are not authorized to edit this")
+  }
 });
 
 app.post("/login", (req, res) => {
