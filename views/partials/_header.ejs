@@ -12,7 +12,7 @@
         <!-- if user is already logged in, display their name and logout button -->
         <% if(user){ %>
         <form action="/logout" method="POST">
-          <a class="nav-item nav-link" href="/urls">Logged in as<%= user.email %></a>
+          <a class="nav-item nav-link" href="/urls">Logged in as <%= user.email %></a>
           <button type="submit">Logout</button>
         </form>
         <!-- if not, display the input bar and login button -->
