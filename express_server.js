@@ -55,10 +55,6 @@ app.get("/", (req, res) => {
 // Displays URLs to logged in user, and only URLs they created
 app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
-  const templateVars = {
-    urls: urlDatabase,
-    user: users[req.session.user_id]
-  };
 
   if (user) {
     const filteredForUser = {
@@ -68,7 +64,7 @@ app.get("/urls", (req, res) => {
 
     res.render("urls_index", filteredForUser);
   } else {
-    res.render("urls_login", templateVars);
+    res.send("Please login to view this page");
   }
 });
 
@@ -88,18 +84,25 @@ app.get("/urls/new", (req, res) => {
 // Displays the newly created URL to the user
 app.get("/urls/:shortURL", (req, res) => {
   const urls = {};
-  urls["url"] = urlDatabase[req.params.shortURL].longURL;
+  // urls["url"] = urlDatabase[req.params.shortURL].longURL;
 
   const templateVars = {
     urls: urls,
     shortURL: req.params.shortURL,
     user: users[req.session.user_id]
   };
+  if (!urlDatabase[req.params.shortURL]) {
+    res.send("Error 404: Page not found");
+  }
+  urls["url"] = urlDatabase[req.params.shortURL].longURL;
   res.render("urls_show", templateVars);
 });
 
 // Redirects user to the URL of that short url
 app.get("/u/:shortURL", (req, res) => {
+  if (!urlDatabase[req.params.shortURL]) {
+    res.send("Error 404: Page not found");
+  }
   res.redirect(urlDatabase[req.params.shortURL].longURL
   );
 });
@@ -172,7 +175,6 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, salt)
   };
-  console.log(users[randomID]);
   req.session["user_id"] = users[randomID].id;
   res.redirect("/urls");
 });
@@ -180,17 +182,19 @@ app.post("/register", (req, res) => {
 // Allows registered user to login
 app.post("/login", (req, res) => {
   const user = userLookUp(users, req.body.email);
-  if (user) {
+  if (req.body.email === "" || req.body.password === "") {
+    res.send("403: Failed to login");
+  } else if (user) {
     bcrypt.compare(req.body.password, user.password, (err, result) => {
       if (result) {
         req.session["user_id"] = user.id;
         res.redirect("/urls");
-      } else if (err) {
-        console.log("Bcrypt didn't work");
       } else {
         res.send("403: Failed to login");
       }
     });
+  } else {
+    res.send("403: Failed to login");
   }
 });
 

@@ -1,3 +1,4 @@
+// function that looks up a user and returns the user object
 const userLookUp = function(obj, email) {
   let user = [];
   for (const key in obj) {
@@ -9,6 +10,7 @@ const userLookUp = function(obj, email) {
   }
 };
 
+//function that only shows URLs created by the logged in user, other links aren't shown
 const urlsForUser = function(urlDatabase, userId) {
   const filteredUrls = {};
 
