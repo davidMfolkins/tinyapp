@@ -1,9 +1,10 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
 const app = express();
 const PORT = 8080; // default port 8080
-
+const salt = bcrypt.genSaltSync(10);
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -153,12 +154,16 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/login", (req, res) => {
   const user = userLookUp(users, req.body.email);
   if (user) {
-    if (user.password === req.body.password) {
-      res.cookie("user_id", user.id);
-      res.redirect("/urls");
-    }
-  } else {
-    res.send("403: Failed to login");
+  bcrypt.compare(req.body.password, user.password, (err, result) => {
+      if (result) {
+        res.cookie("user_id", user.id);
+        res.redirect("/urls");
+      } else if (err) {
+        console.log("Bcrypt didn't work")
+      } else {
+        res.send("403: Failed to login");
+      }
+    })
   }
 });
 
@@ -181,8 +186,9 @@ app.post("/register", (req, res) => {
   users[randomID] = {
     id: randomID,
     email: req.body.email,
-    password: req.body.password
+    password: bcrypt.hashSync(req.body.password, salt)
   };
+  console.log(users[randomID])
   res.cookie("user_id", randomID);
   res.redirect("/urls");
 });
