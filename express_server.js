@@ -84,18 +84,24 @@ app.get("/urls/new", (req, res) => {
 // Displays the newly created URL to the user
 app.get("/urls/:shortURL", (req, res) => {
   const urls = {};
-  // urls["url"] = urlDatabase[req.params.shortURL].longURL;
-
+  const user = users[req.session.user_id];
   const templateVars = {
     urls: urls,
     shortURL: req.params.shortURL,
     user: users[req.session.user_id]
   };
+
   if (!urlDatabase[req.params.shortURL]) {
     res.send("Error 404: Page not found");
+  } else if (!user) {
+    res.send("400: You are not authorized to view this");
+  } else if (user.id === urlDatabase[req.params.shortURL].userID) {
+    urls["url"] = urlDatabase[req.params.shortURL].longURL;
+    res.render("urls_show", templateVars);
+  } else {
+    res.send("400: You are not authorized to view this");
   }
-  urls["url"] = urlDatabase[req.params.shortURL].longURL;
-  res.render("urls_show", templateVars);
+
 });
 
 // Redirects user to the URL of that short url
